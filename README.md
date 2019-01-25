@@ -5,7 +5,7 @@ A minimal 3D Vector library in Rust. Designed with a preference for towards conv
 
 ### License
 
-This project is licensed under the MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
+This project is licensed under the MIT license ([LICENSE](LICENSE) or http://opensource.org/licenses/MIT)
 
 
 ### TODO
