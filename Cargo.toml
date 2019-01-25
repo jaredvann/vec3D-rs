@@ -1,0 +1,9 @@
+[package]
+name = "vec3D"
+version = "0.1.0"
+authors = ["Jared Vann <jared@vann.me>"]
+edition = "2018"
+
+[dependencies]
+nearly_eq = "0.2.4"
+float-cmp = "0.4.0"
