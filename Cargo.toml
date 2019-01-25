@@ -3,6 +3,10 @@ name = "vec3D"
 version = "0.1.0"
 authors = ["Jared Vann <jared@vann.me>"]
 edition = "2018"
+description = "A minimal 3D Vector library in Rust."
+repository = "https://github.com/jaredvann/Vec3D"
+license = "MIT"
+license-file = "LICENSE"
 
 [dependencies]
 nearly_eq = "0.2.4"
