@@ -7,6 +7,12 @@ description = "A minimal 3D Vector library in Rust."
 repository = "https://github.com/jaredvann/Vec3D"
 license = "MIT"
 license-file = "LICENSE"
+readme = "README.md"
+keywords = ["geometry", "vector", "physics"]
+categories = ["science"]
+
+[badges]
+maintenance = { status = "experimental" }
 
 [dependencies]
 nearly_eq = "0.2.4"
