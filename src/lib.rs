@@ -76,24 +76,22 @@ extern crate nearly_eq;
 
 use std::cmp;
 use std::error;
+use std::f64::consts::PI;
 use std::fmt;
 use std::ops;
-use std::f64::consts::PI;
 
 use float_cmp::ApproxEq;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Vec3DError {
     RadiusLessThanZero,
-    RhoLessThanZero,
-    ThetaNotWithinRange
+    ThetaNotWithinRange,
 }
 
 impl fmt::Display for Vec3DError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             Vec3DError::RadiusLessThanZero => write!(f, "Vec3D error: given value for the radius is less than 0.0."),
-            Vec3DError::RhoLessThanZero => write!(f, "Vec3D error: given value for rho is less than 0.0."),
             Vec3DError::ThetaNotWithinRange => write!(f, "Vec3D error: given value for theta not within the range [0, PI]"),
         }
     }
@@ -153,18 +151,18 @@ impl Vec3D {
     ///
     /// # Errors
     ///
-    pub fn new_from_cylindrical_coordinates(rho: f64, phi: f64, z: f64) -> Result<Self, Vec3DError> {
-        if rho < 0.0 {
-            return Err(Vec3DError::RhoLessThanZero);
     /// Will return a `Vec3DError` if:
     ///  - `r < 0`
+    pub fn new_from_cylindrical_coordinates(r: f64, phi: f64, z: f64) -> Result<Self, Vec3DError> {
+        if r < 0.0 {
+            return Err(Vec3DError::RadiusLessThanZero);
         };
 
         let (sin_phi, cos_phi) = phi.sin_cos();
 
         Ok(Self {
-            x: rho * cos_phi,
-            y: rho * sin_phi,
+            x: r * cos_phi,
+            y: r * sin_phi,
             z,
         })
     }
@@ -233,8 +231,8 @@ impl Vec3D {
     }
 
     /// Rotates the vector around the x-axis
-    pub fn rotate_x(&mut self, phi: f64) {
-        let (sinphi, cosphi) = phi.sin_cos();
+    pub fn rotate_x(&mut self, angle: f64) {
+        let (sinphi, cosphi) = angle.sin_cos();
 
         let ty = self.y * cosphi - self.z * sinphi;
         self.z = self.z * cosphi + self.y * sinphi;
@@ -242,8 +240,8 @@ impl Vec3D {
     }
 
     /// Rotates the vector around the y-axis
-    pub fn rotate_y(&mut self, phi: f64) {
-        let (sinphi, cosphi) = phi.sin_cos();
+    pub fn rotate_y(&mut self, angle: f64) {
+        let (sinphi, cosphi) = angle.sin_cos();
 
         let tz = self.z * cosphi - self.x * sinphi;
         self.x = self.x * cosphi + self.z * sinphi;
@@ -251,8 +249,8 @@ impl Vec3D {
     }
 
     /// Rotates the vector around the z-axis
-    pub fn rotate_z(&mut self, phi: f64) {
-        let (sinphi, cosphi) = phi.sin_cos();
+    pub fn rotate_z(&mut self, angle: f64) {
+        let (sinphi, cosphi) = angle.sin_cos();
 
         let tx = self.x * cosphi - self.y * sinphi;
         self.y = self.y * cosphi + self.x * sinphi;
@@ -379,12 +377,12 @@ mod tests {
         assert_nearly_eq!(vec.z, 7.0710678118654752);
 
         // Test failure condition 1
-        let vec = Vec3D::new_from_spherical_coordinates(-1.0, PI/2.0, PI/2.0);
+        let vec = Vec3D::new_from_spherical_coordinates(-1.0, PI / 2.0, PI / 2.0);
         assert!(vec.is_err());
         assert_eq!(vec.err().unwrap(), Vec3DError::RadiusLessThanZero);
 
         // Test failure condition 2
-        let vec = Vec3D::new_from_spherical_coordinates(1.0, PI*2.0, PI/2.0);
+        let vec = Vec3D::new_from_spherical_coordinates(1.0, PI * 2.0, PI / 2.0);
         assert!(vec.is_err());
         assert_eq!(vec.err().unwrap(), Vec3DError::ThetaNotWithinRange);
     }
@@ -398,9 +396,9 @@ mod tests {
         assert_nearly_eq!(vec.z, 20.0);
 
         // Test failure condition
-        let vec = Vec3D::new_from_cylindrical_coordinates(-1.0, PI/2.0, 10.0);
+        let vec = Vec3D::new_from_cylindrical_coordinates(-1.0, PI / 2.0, 10.0);
         assert!(vec.is_err());
-        assert_eq!(vec.err().unwrap(), Vec3DError::RhoLessThanZero);
+        assert_eq!(vec.err().unwrap(), Vec3DError::RadiusLessThanZero);
     }
 
     #[test]
@@ -654,7 +652,7 @@ mod tests {
     fn mul() {
         let vec1 = Vec3D::new(10.0, 10.0, 10.0);
         let vec2 = Vec3D::new(30.0, 30.0, 30.0);
-        assert_eq!(vec1*3.0, vec2);
+        assert_eq!(vec1 * 3.0, vec2);
     }
 
     #[test]
@@ -670,7 +668,7 @@ mod tests {
     fn div() {
         let vec1 = Vec3D::new(30.0, 30.0, 30.0);
         let vec2 = Vec3D::new(10.0, 10.0, 10.0);
-        assert_eq!(vec1/3.0, vec2);
+        assert_eq!(vec1 / 3.0, vec2);
     }
 
     #[test]
