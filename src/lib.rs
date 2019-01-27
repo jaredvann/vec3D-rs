@@ -29,15 +29,15 @@
 //!  - **r** - radial distance
 //!  - **theta** - polar angle
 //!  - **phi** - azimuthal angle
-//! 
+//!
 //! ![spherical-coordinates-diagram](https://upload.wikimedia.org/wikipedia/commons/4/4f/3D_Spherical.svg)
-//! 
+//!
 //! And cylindrical coordinates:
-//! 
+//!
 //!  - **r** - radial distance
 //!  - **phi** - angle
 //!  - **z** - height along z-axis
-//! 
+//!
 //!  All angles are in radians.
 //!
 //! # Examples
@@ -167,6 +167,44 @@ impl Vec3D {
         })
     }
 
+    /// Returns the projection of the vector in the x-axis
+    #[inline]
+    pub fn x_proj(&self) -> Self {
+        Self::new(self.x, 0.0, 0.0)
+    }
+
+    /// Returns the projection of the vector in the y-axis
+    #[inline]
+    pub fn y_proj(&self) -> Self {
+        Self::new(0.0, self.y, 0.0)
+    }
+
+    /// Returns the projection of the vector in the z-axis
+    #[inline]
+    pub fn z_proj(&self) -> Self {
+        Self::new(0.0, 0.0, self.z)
+    }
+
+    /// Returns the vector's theta value in spherical coordinates
+    #[inline]
+    pub fn theta(&self) -> f64 {
+        if self.x == 0.0 && self.y == 0.0 && self.z == 0.0 {
+            0.0
+        } else {
+            (self.x * self.x + self.y * self.y).sqrt().atan2(self.z)
+        }
+    }
+
+    /// Returns the vector's phi value in spherical/cylindrical coordinates
+    #[inline]
+    pub fn phi(&self) -> f64 {
+        if self.x == 0.0 && self.y == 0.0 {
+            0.0
+        } else {
+            self.y.atan2(self.x)
+        }
+    }
+
     /// Returns the vector's magnitude
     #[inline]
     pub fn mag(&self) -> f64 {
@@ -255,6 +293,13 @@ impl Vec3D {
         let tx = self.x * cosphi - self.y * sinphi;
         self.y = self.y * cosphi + self.x * sinphi;
         self.x = tx;
+    }
+
+    /// Returns true if points are approximately equal
+    pub fn approx_eq(self, other: Self) -> bool {
+        self.x.approx_eq(&other.x, 2.0 * ::std::f64::EPSILON, 2)
+            && self.y.approx_eq(&other.y, 2.0 * ::std::f64::EPSILON, 2)
+            && self.z.approx_eq(&other.z, 2.0 * ::std::f64::EPSILON, 2)
     }
 }
 
@@ -399,6 +444,66 @@ mod tests {
         let vec = Vec3D::new_from_cylindrical_coordinates(-1.0, PI / 2.0, 10.0);
         assert!(vec.is_err());
         assert_eq!(vec.err().unwrap(), Vec3DError::RadiusLessThanZero);
+    }
+
+    #[test]
+    fn x_proj() {
+        // Test calculation of vector's projection in x-axis
+        let vec = Vec3D::new(10.0, 10.0, 10.0);
+        assert_eq!(vec.x_proj(), Vec3D::new(10.0, 0.0, 0.0));
+    }
+
+    #[test]
+    fn y_proj() {
+        // Test calculation of vector's projection in y-axis
+        let vec = Vec3D::new(10.0, 10.0, 10.0);
+        assert_eq!(vec.y_proj(), Vec3D::new(0.0, 10.0, 0.0));
+    }
+
+    #[test]
+    fn z_proj() {
+        // Test calculation of vector's projection in z-axis
+        let vec = Vec3D::new(10.0, 10.0, 10.0);
+        assert_eq!(vec.z_proj(), Vec3D::new(0.0, 0.0, 10.0));
+    }
+
+    #[test]
+    fn theta() {
+        // Test calculation of theta values from vector
+        let vec = Vec3D::new(1.0, 0.0, 0.0);
+        assert_eq!(vec.theta(), PI / 2.0);
+
+        let vec = Vec3D::new(0.0, 1.0, 1.0);
+        assert_eq!(vec.theta(), PI / 4.0);
+
+        let vec = Vec3D::new(0.0, 0.0, 1.0);
+        assert_eq!(vec.theta(), 0.0);
+
+        for i in 1..8 {
+            let theta = PI / i as f64;
+
+            let vec = Vec3D::new_from_spherical_coordinates(1.0, theta, 0.0).unwrap();
+            assert_nearly_eq!(vec.theta(), theta);
+        }
+    }
+
+    #[test]
+    fn phi() {
+        // Test calculation of theta values from vector
+        let vec = Vec3D::new(1.0, 0.0, 0.0);
+        assert_eq!(vec.phi(), 0.0);
+
+        let vec = Vec3D::new(0.0, 1.0, 1.0);
+        assert_eq!(vec.phi(), PI / 2.0);
+
+        let vec = Vec3D::new(0.0, 0.0, 1.0);
+        assert_eq!(vec.phi(), 0.0);
+
+        for i in 2..8 {
+            let phi = (2.0 * PI) / i as f64;
+            let vec = Vec3D::new_from_spherical_coordinates(1.0, PI / 2.0, phi).unwrap();
+            assert_nearly_eq!(vec.phi(), phi);
+        }
     }
 
     #[test]
