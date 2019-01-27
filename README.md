@@ -6,7 +6,22 @@
 
 A minimal 3D Vector library in Rust. Designed with a preference towards conventions from physics. Inspired by the [CLHEP](http://proj-clhep.web.cern.ch/proj-clhep/) Hep3Vector class.
 
-**WARNING** Please treat this library as experimental and not production ready.
+# Conventions
+
+This module uses the convention for describing spherical coordinates as used
+in the physics community as follows:
+
+ - **r** - radial distance
+ - **theta** - polar angle
+ - **phi** - azimuthal angle
+
+And cylindrical coordinates:
+
+ - **r** - radial distance
+ - **phi** - angle
+ - **z** - height along z-axis
+
+ All angles are in radians.
 
 ## Examples
 

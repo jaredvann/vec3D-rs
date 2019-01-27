@@ -1,3 +1,76 @@
+// Copyright 2019 Jared Vann
+
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+//! A minimal 3D Vector library in Rust. Designed with a preference towards
+//! conventions from physics. Inspired by the CLHEP Hep3Vector class.
+//!
+//! # Conventions
+//!
+//! This module uses the convention for describing spherical coordinates as used
+//! in the physics community as follows:
+//!
+//!  - **r** - radial distance
+//!  - **theta** - polar angle
+//!  - **phi** - azimuthal angle
+//! 
+//! ![spherical-coordinates-diagram](https://upload.wikimedia.org/wikipedia/commons/4/4f/3D_Spherical.svg)
+//! 
+//! And cylindrical coordinates:
+//! 
+//!  - **r** - radial distance
+//!  - **phi** - angle
+//!  - **z** - height along z-axis
+//! 
+//!  All angles are in radians.
+//!
+//! # Examples
+//!
+//! ```
+//! use vec3D::Vec3D;
+//!
+//! fn main() {
+//!     // Simple Initialisation
+//!     let vec1 = Vec3D::new(1.0, 2.0, 3.0);
+//!     println!("{}", vec1); // Prints: "[1.0, 2.0, 3.0]"
+//!
+//!     // Operator overloads for clean code
+//!     let vec2 = Vec3D::new(3.0, 4.0, 5.0);
+//!     let vec3 = vec1 + vec2;
+//!     println!("{}", vec3); // Prints: "[4.0, 6.0, 8.0]"
+//!
+//!     let vec4 = vec3 * 2.0;
+//!     println!("{}", vec4); // Prints: "[8.0, 12.0, 16.0]"
+//!
+//!     // Common vector operations
+//!     let dot_product = vec3.dot(vec4);
+//!     println!("{}", dot_product); // Prints: "232"
+//!
+//!    let vec5 = Vec3D::new(1.0, 0.0, 0.0);
+//!    let vec6 = Vec3D::new(0.0, 1.0, 0.0);
+//!    let cross_product = vec5.cross(vec6);
+//!    println!("{}", cross_product); // Prints: "[0.0, 0.0, 1.0]"
+//!
+//!    // Plus initialisations from spherical/cylindrical coordinates, rotations and more
+//! }
+//! ```
+
 #[macro_use]
 extern crate nearly_eq;
 
@@ -42,14 +115,16 @@ impl Vec3D {
 
     /// Creates a new 3D vector from spherical coordinates
     ///
-    /// * `r`
-    /// * `theta`
-    /// * `phi`
+    ///  - **r** - radial distance
+    ///  - **theta** - polar angle
+    ///  - **phi** - azimuthal angle
     ///
-    /// Will return an Error if:
-    /// * the given radius is less than 0
-    /// * theta is not within the range [0, PI]
+    /// # Errors
     ///
+    /// Will return a `Vec3DError` if:
+    ///  - `r < 0`
+    ///  - `theta < 0`
+    ///  - `theta > PI`
     pub fn new_from_spherical_coordinates(r: f64, theta: f64, phi: f64) -> Result<Self, Vec3DError> {
         if r < 0.0 {
             return Err(Vec3DError::RadiusLessThanZero);
@@ -72,16 +147,17 @@ impl Vec3D {
 
     /// Creates a new 3D vector from cylindrical coordinates
     ///
-    /// * `rho`
-    /// * `phi`
-    /// * `z`
+    ///  - **r** - radial distance
+    ///  - **phi** - angle
+    ///  - **z** - height along z-axis
     ///
-    /// Will return an Error if:
-    /// * the given rho is less than 0
+    /// # Errors
     ///
     pub fn new_from_cylindrical_coordinates(rho: f64, phi: f64, z: f64) -> Result<Self, Vec3DError> {
         if rho < 0.0 {
             return Err(Vec3DError::RhoLessThanZero);
+    /// Will return a `Vec3DError` if:
+    ///  - `r < 0`
         };
 
         let (sin_phi, cos_phi) = phi.sin_cos();
@@ -117,28 +193,19 @@ impl Vec3D {
         }
     }
 
-    /// Returns the inner product of this vector with another
-    ///
-    /// * `other`
-    ///
+    /// Returns the inner product of this vector with another vector
     #[inline]
     pub fn inner_product(&self, other: Self) -> f64 {
         self.x * other.x + self.y * other.y + self.z * other.z
     }
 
     /// Alias for Vec3D::inner_product
-    ///
-    /// * `other`
-    ///
     #[inline]
     pub fn dot(&self, other: Self) -> f64 {
         self.x * other.x + self.y * other.y + self.z * other.z
     }
 
-    /// Returns the cross product of this vector with another
-    ///
-    /// * `other`
-    ///
+    /// Returns the cross product of this vector with another vector
     #[inline]
     pub fn cross(&self, other: Self) -> Self {
         Vec3D::new(
@@ -149,9 +216,8 @@ impl Vec3D {
     }
 
     /// Returns the pseudo-rapidity of the vector w.r.t the z-axis
-    /// 
-    /// https://en.wikipedia.org/wiki/Pseudorapidity
-    /// 
+    ///
+    /// See: [https://en.wikipedia.org/wiki/Pseudorapidity](https://en.wikipedia.org/wiki/Pseudorapidity)
     pub fn pseudo_rapidity(&self) -> f64 {
         let m = self.mag();
 
@@ -167,9 +233,6 @@ impl Vec3D {
     }
 
     /// Rotates the vector around the x-axis
-    ///
-    /// * `phi` - angle to rotate by (in radians)
-    ///
     pub fn rotate_x(&mut self, phi: f64) {
         let (sinphi, cosphi) = phi.sin_cos();
 
@@ -179,9 +242,6 @@ impl Vec3D {
     }
 
     /// Rotates the vector around the y-axis
-    ///
-    /// * `phi` - angle to rotate by (in radians)
-    ///
     pub fn rotate_y(&mut self, phi: f64) {
         let (sinphi, cosphi) = phi.sin_cos();
 
@@ -191,9 +251,6 @@ impl Vec3D {
     }
 
     /// Rotates the vector around the z-axis
-    ///
-    /// * `phi` - angle to rotate by (in radians)
-    ///
     pub fn rotate_z(&mut self, phi: f64) {
         let (sinphi, cosphi) = phi.sin_cos();
 
