@@ -1,6 +1,6 @@
 [package]
 name = "vec3D"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Jared Vann <jared@vann.me>"]
 edition = "2018"
 description = "A minimal 3D Vector library in Rust."
