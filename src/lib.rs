@@ -5,10 +5,9 @@ use std::cmp;
 use std::error;
 use std::fmt;
 use std::ops;
+use std::f64::consts::PI;
 
 use float_cmp::ApproxEq;
-
-const PI: f64 = std::f64::consts::PI;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Vec3DError {
@@ -97,7 +96,7 @@ impl Vec3D {
     /// Returns the vector's magnitude
     #[inline]
     pub fn mag(&self) -> f64 {
-        (self.x * self.x + self.y * self.y + self.z * self.z).sqrt()
+        self.mag2().sqrt()
     }
 
     /// Returns the vector's magnitude^2
@@ -109,12 +108,12 @@ impl Vec3D {
     /// Returns the vector's unit vector
     #[inline]
     pub fn unit(&self) -> Self {
-        let tot = self.mag2();
+        let mag2 = self.mag2();
 
-        if tot == 0.0 {
+        if mag2 == 0.0 {
             Self::new(0.0, 0.0, 0.0)
         } else {
-            *self * 1.0 / tot.sqrt()
+            *self * 1.0 / mag2.sqrt()
         }
     }
 
@@ -301,14 +300,14 @@ impl ops::DivAssign<f64> for Vec3D {
 
 #[cfg(test)]
 mod tests {
-    use super::Vec3DError;
+    use super::{Vec3D, Vec3DError};
 
     const PI: f64 = std::f64::consts::PI;
 
     #[test]
     fn create_vector() {
         // Test creation of basic vector
-        let vec = super::Vec3D::new(1.0, 2.0, 3.0);
+        let vec = Vec3D::new(1.0, 2.0, 3.0);
         assert_eq!(vec.x, 1.0);
         assert_eq!(vec.y, 2.0);
         assert_eq!(vec.z, 3.0);
@@ -317,18 +316,18 @@ mod tests {
     #[test]
     fn new_from_spherical_coordinates() {
         // Test creation of vector from spherical coordinates
-        let vec = super::Vec3D::new_from_spherical_coordinates(10.0, PI / 4.0, PI / 4.0).unwrap();
+        let vec = Vec3D::new_from_spherical_coordinates(10.0, PI / 4.0, PI / 4.0).unwrap();
         assert_nearly_eq!(vec.x, 5.0);
         assert_nearly_eq!(vec.y, 5.0);
         assert_nearly_eq!(vec.z, 7.0710678118654752);
 
         // Test failure condition 1
-        let vec = super::Vec3D::new_from_spherical_coordinates(-1.0, PI/2.0, PI/2.0);
+        let vec = Vec3D::new_from_spherical_coordinates(-1.0, PI/2.0, PI/2.0);
         assert!(vec.is_err());
         assert_eq!(vec.err().unwrap(), Vec3DError::RadiusLessThanZero);
 
         // Test failure condition 2
-        let vec = super::Vec3D::new_from_spherical_coordinates(1.0, PI*2.0, PI/2.0);
+        let vec = Vec3D::new_from_spherical_coordinates(1.0, PI*2.0, PI/2.0);
         assert!(vec.is_err());
         assert_eq!(vec.err().unwrap(), Vec3DError::ThetaNotWithinRange);
     }
@@ -336,13 +335,13 @@ mod tests {
     #[test]
     fn new_from_cylindrical_coordinates() {
         // Test creation of vector from spherical coordinates
-        let vec = super::Vec3D::new_from_cylindrical_coordinates(10.0, PI / 4.0, 20.0).unwrap();
+        let vec = Vec3D::new_from_cylindrical_coordinates(10.0, PI / 4.0, 20.0).unwrap();
         assert_nearly_eq!(vec.x, 7.0710678118654752);
         assert_nearly_eq!(vec.y, 7.0710678118654752);
         assert_nearly_eq!(vec.z, 20.0);
 
         // Test failure condition
-        let vec = super::Vec3D::new_from_cylindrical_coordinates(-1.0, PI/2.0, 10.0);
+        let vec = Vec3D::new_from_cylindrical_coordinates(-1.0, PI/2.0, 10.0);
         assert!(vec.is_err());
         assert_eq!(vec.err().unwrap(), Vec3DError::RhoLessThanZero);
     }
@@ -350,21 +349,21 @@ mod tests {
     #[test]
     fn mag() {
         // Test calculation of vector's magnitude
-        let vec = super::Vec3D::new(10.0, 10.0, 10.0);
+        let vec = Vec3D::new(10.0, 10.0, 10.0);
         assert_nearly_eq!(vec.mag(), 17.320508075688772);
     }
 
     #[test]
     fn mag2() {
         // Test calculation of vector's magnitude^2
-        let vec = super::Vec3D::new(10.0, 10.0, 10.0);
+        let vec = Vec3D::new(10.0, 10.0, 10.0);
         assert_eq!(vec.mag2(), 300.0);
     }
 
     #[test]
     fn unit() {
         // Test calculation of vector's unit vector
-        let vec = super::Vec3D::new(10.0, 20.0, 30.0).unit();
+        let vec = Vec3D::new(10.0, 20.0, 30.0).unit();
         assert_nearly_eq!(vec.x, 0.2672612419124243);
         assert_nearly_eq!(vec.y, 0.5345224838248487);
         assert_nearly_eq!(vec.z, 0.8017837257372731);
@@ -373,8 +372,8 @@ mod tests {
     #[test]
     fn inner_product() {
         // Test calculation of the inner product of two vectors
-        let vec1 = super::Vec3D::new(10.0, 20.0, 30.0);
-        let vec2 = super::Vec3D::new(40.0, 50.0, 60.0);
+        let vec1 = Vec3D::new(10.0, 20.0, 30.0);
+        let vec2 = Vec3D::new(40.0, 50.0, 60.0);
         assert_eq!(vec1.inner_product(vec2), 3200.0);
         assert_eq!(vec2.inner_product(vec1), 3200.0);
     }
@@ -382,8 +381,8 @@ mod tests {
     #[test]
     fn dot() {
         // Test calculation of the inner product of two vectors
-        let vec1 = super::Vec3D::new(10.0, 20.0, 30.0);
-        let vec2 = super::Vec3D::new(40.0, 50.0, 60.0);
+        let vec1 = Vec3D::new(10.0, 20.0, 30.0);
+        let vec2 = Vec3D::new(40.0, 50.0, 60.0);
         assert_eq!(vec1.dot(vec2), 3200.0);
         assert_eq!(vec2.dot(vec1), 3200.0);
     }
@@ -391,64 +390,64 @@ mod tests {
     #[test]
     fn cross() {
         // Test calculation of the cross product of two vectors
-        let vec1 = super::Vec3D::new(10.0, 20.0, 30.0);
-        let vec2 = super::Vec3D::new(40.0, 50.0, 60.0);
-        assert_eq!(vec1.cross(vec2), super::Vec3D::new(-300.0, 600.0, -300.0));
-        assert_eq!(vec2.cross(vec1), super::Vec3D::new(300.0, -600.0, 300.0));
+        let vec1 = Vec3D::new(10.0, 20.0, 30.0);
+        let vec2 = Vec3D::new(40.0, 50.0, 60.0);
+        assert_eq!(vec1.cross(vec2), Vec3D::new(-300.0, 600.0, -300.0));
+        assert_eq!(vec2.cross(vec1), Vec3D::new(300.0, -600.0, 300.0));
     }
 
     #[test]
     fn pseudo_rapidity() {
         // Test when theta is PI/2, pseudo-rapidity is 0
-        let vec1 = super::Vec3D::new(1.0, 1.0, 0.0);
+        let vec1 = Vec3D::new(1.0, 1.0, 0.0);
         assert_eq!(vec1.pseudo_rapidity(), 0.0);
 
         // Test when theta is 0, pseudo-rapidity is inf
-        let vec2 = super::Vec3D::new(0.0, 0.0, 1.0);
+        let vec2 = Vec3D::new(0.0, 0.0, 1.0);
         assert_eq!(vec2.pseudo_rapidity(), std::f64::INFINITY);
 
         // Test when theta is PI/4
-        let vec3 = super::Vec3D::new(1.0, 0.0, 1.0);
+        let vec3 = Vec3D::new(1.0, 0.0, 1.0);
         assert_nearly_eq!(vec3.pseudo_rapidity(), 0.881373587019543025232609);
     }
 
     #[test]
     fn rotate_x() {
         // Test on null vector, rotate 0
-        let vec = super::Vec3D::new(0.0, 0.0, 0.0);
+        let vec = Vec3D::new(0.0, 0.0, 0.0);
         let mut vec2 = vec;
         vec2.rotate_x(0.0);
         assert_eq!(vec, vec2);
 
         // Test on null vector, rotate 180
-        let vec = super::Vec3D::new(0.0, 0.0, 0.0);
+        let vec = Vec3D::new(0.0, 0.0, 0.0);
         let mut vec2 = vec;
         vec2.rotate_x(PI);
         assert_eq!(vec, vec2);
 
         // Test on y-dir unit vector, rotate PI
-        let mut vec = super::Vec3D::new(0.0, 1.0, 0.0);
+        let mut vec = Vec3D::new(0.0, 1.0, 0.0);
         vec.rotate_x(PI);
         assert_nearly_eq!(vec.x, 0.0);
         assert_nearly_eq!(vec.y, -1.0);
         assert_nearly_eq!(vec.z, 0.0);
 
         // Test on y-dir unit vector, rotate PI/2
-        let mut vec = super::Vec3D::new(0.0, 1.0, 0.0);
+        let mut vec = Vec3D::new(0.0, 1.0, 0.0);
         vec.rotate_x(PI / 2.0);
         assert_nearly_eq!(vec.x, 0.0);
         assert_nearly_eq!(vec.y, 0.0);
         assert_nearly_eq!(vec.z, 1.0);
 
         // Test on z-dir unit vector, rotate PI
-        let mut vec = super::Vec3D::new(0.0, 0.0, 1.0);
+        let mut vec = Vec3D::new(0.0, 0.0, 1.0);
         vec.rotate_x(PI);
         assert_nearly_eq!(vec.x, 0.0);
         assert_nearly_eq!(vec.y, 0.0);
         assert_nearly_eq!(vec.z, -1.0);
 
         // Test on z-dir unit vector, rotate PI/2
-        let mut vec = super::Vec3D::new(0.0, 0.0, 1.0);
+        let mut vec = Vec3D::new(0.0, 0.0, 1.0);
         vec.rotate_x(PI / 2.0);
         assert_nearly_eq!(vec.x, 0.0);
         assert_nearly_eq!(vec.y, -1.0);
@@ -458,40 +457,40 @@ mod tests {
     #[test]
     fn rotate_y() {
         // Test on null vector, rotate 0
-        let vec = super::Vec3D::new(0.0, 0.0, 0.0);
+        let vec = Vec3D::new(0.0, 0.0, 0.0);
         let mut vec2 = vec;
         vec2.rotate_y(0.0);
         assert_eq!(vec, vec2);
 
         // Test on null vector, rotate 180
-        let vec = super::Vec3D::new(0.0, 0.0, 0.0);
+        let vec = Vec3D::new(0.0, 0.0, 0.0);
         let mut vec2 = vec;
         vec2.rotate_y(PI);
         assert_eq!(vec, vec2);
 
         // Test on x-dir unit vector, rotate PI
-        let mut vec = super::Vec3D::new(1.0, 0.0, 0.0);
+        let mut vec = Vec3D::new(1.0, 0.0, 0.0);
         vec.rotate_y(PI);
         assert_nearly_eq!(vec.x, -1.0);
         assert_nearly_eq!(vec.y, 0.0);
         assert_nearly_eq!(vec.z, 0.0);
 
         // Test on x-dir unit vector, rotate PI/2
-        let mut vec = super::Vec3D::new(1.0, 0.0, 0.0);
+        let mut vec = Vec3D::new(1.0, 0.0, 0.0);
         vec.rotate_y(PI / 2.0);
         assert_nearly_eq!(vec.x, 0.0);
         assert_nearly_eq!(vec.y, 0.0);
         assert_nearly_eq!(vec.z, -1.0);
 
         // Test on z-dir unit vector, rotate PI
-        let mut vec = super::Vec3D::new(0.0, 0.0, 1.0);
+        let mut vec = Vec3D::new(0.0, 0.0, 1.0);
         vec.rotate_y(PI);
         assert_nearly_eq!(vec.x, 0.0);
         assert_nearly_eq!(vec.y, 0.0);
         assert_nearly_eq!(vec.z, -1.0);
 
         // Test on z-dir unit vector, rotate PI/2
-        let mut vec = super::Vec3D::new(0.0, 0.0, 1.0);
+        let mut vec = Vec3D::new(0.0, 0.0, 1.0);
         vec.rotate_y(PI / 2.0);
         assert_nearly_eq!(vec.x, 1.0);
         assert_nearly_eq!(vec.y, 0.0);
@@ -501,40 +500,40 @@ mod tests {
     #[test]
     fn rotate_z() {
         // Test on null vector, rotate 0
-        let vec = super::Vec3D::new(0.0, 0.0, 0.0);
+        let vec = Vec3D::new(0.0, 0.0, 0.0);
         let mut vec2 = vec;
         vec2.rotate_z(0.0);
         assert_eq!(vec, vec2);
 
         // Test on null vector, rotate 180
-        let vec = super::Vec3D::new(0.0, 0.0, 0.0);
+        let vec = Vec3D::new(0.0, 0.0, 0.0);
         let mut vec2 = vec;
         vec2.rotate_z(PI);
         assert_eq!(vec, vec2);
 
         // Test on x-dir unit vector, rotate PI
-        let mut vec = super::Vec3D::new(1.0, 0.0, 0.0);
+        let mut vec = Vec3D::new(1.0, 0.0, 0.0);
         vec.rotate_z(PI);
         assert_nearly_eq!(vec.x, -1.0);
         assert_nearly_eq!(vec.y, 0.0);
         assert_nearly_eq!(vec.z, 0.0);
 
         // Test on x-dir unit vector, rotate PI/2
-        let mut vec = super::Vec3D::new(1.0, 0.0, 0.0);
+        let mut vec = Vec3D::new(1.0, 0.0, 0.0);
         vec.rotate_z(PI / 2.0);
         assert_nearly_eq!(vec.x, 0.0);
         assert_nearly_eq!(vec.y, 1.0);
         assert_nearly_eq!(vec.z, 0.0);
 
         // Test on y-dir unit vector, rotate PI
-        let mut vec = super::Vec3D::new(0.0, 1.0, 0.0);
+        let mut vec = Vec3D::new(0.0, 1.0, 0.0);
         vec.rotate_z(PI);
         assert_nearly_eq!(vec.x, 0.0);
         assert_nearly_eq!(vec.y, -1.0);
         assert_nearly_eq!(vec.z, 0.0);
 
         // Test on y-dir unit vector, rotate PI/2
-        let mut vec = super::Vec3D::new(0.0, 1.0, 0.0);
+        let mut vec = Vec3D::new(0.0, 1.0, 0.0);
         vec.rotate_z(PI / 2.0);
         assert_nearly_eq!(vec.x, -1.0);
         assert_nearly_eq!(vec.y, 0.0);
@@ -543,26 +542,26 @@ mod tests {
 
     #[test]
     fn partial_eq() {
-        let vec1 = super::Vec3D::new(10.0, 10.0, 10.0);
-        let vec2 = super::Vec3D::new(10.0, 10.0, 10.0);
-        let vec3 = super::Vec3D::new(20.0, 20.0, 20.0);
+        let vec1 = Vec3D::new(10.0, 10.0, 10.0);
+        let vec2 = Vec3D::new(10.0, 10.0, 10.0);
+        let vec3 = Vec3D::new(20.0, 20.0, 20.0);
         assert_eq!(vec1, vec2);
         assert_ne!(vec2, vec3);
     }
 
     #[test]
     fn add() {
-        let vec1 = super::Vec3D::new(10.0, 10.0, 10.0);
-        let vec2 = super::Vec3D::new(20.0, 20.0, 20.0);
-        let vec3 = super::Vec3D::new(30.0, 30.0, 30.0);
+        let vec1 = Vec3D::new(10.0, 10.0, 10.0);
+        let vec2 = Vec3D::new(20.0, 20.0, 20.0);
+        let vec3 = Vec3D::new(30.0, 30.0, 30.0);
         assert_eq!(vec1 + vec2, vec3);
     }
 
     #[test]
     fn add_assign() {
-        let mut vec1 = super::Vec3D::new(10.0, 10.0, 10.0);
-        let vec2 = super::Vec3D::new(20.0, 20.0, 20.0);
-        let vec3 = super::Vec3D::new(30.0, 30.0, 30.0);
+        let mut vec1 = Vec3D::new(10.0, 10.0, 10.0);
+        let vec2 = Vec3D::new(20.0, 20.0, 20.0);
+        let vec3 = Vec3D::new(30.0, 30.0, 30.0);
 
         vec1 += vec2;
         assert_eq!(vec1, vec3);
@@ -570,17 +569,17 @@ mod tests {
 
     #[test]
     fn sub() {
-        let vec1 = super::Vec3D::new(10.0, 10.0, 10.0);
-        let vec2 = super::Vec3D::new(20.0, 20.0, 20.0);
-        let vec3 = super::Vec3D::new(30.0, 30.0, 30.0);
+        let vec1 = Vec3D::new(10.0, 10.0, 10.0);
+        let vec2 = Vec3D::new(20.0, 20.0, 20.0);
+        let vec3 = Vec3D::new(30.0, 30.0, 30.0);
         assert_eq!(vec3 - vec2, vec1);
     }
 
     #[test]
     fn sub_assign() {
-        let vec1 = super::Vec3D::new(10.0, 10.0, 10.0);
-        let vec2 = super::Vec3D::new(20.0, 20.0, 20.0);
-        let mut vec3 = super::Vec3D::new(30.0, 30.0, 30.0);
+        let vec1 = Vec3D::new(10.0, 10.0, 10.0);
+        let vec2 = Vec3D::new(20.0, 20.0, 20.0);
+        let mut vec3 = Vec3D::new(30.0, 30.0, 30.0);
 
         vec3 -= vec2;
         assert_eq!(vec1, vec3);
@@ -588,23 +587,23 @@ mod tests {
 
     #[test]
     fn neg() {
-        let vec1 = super::Vec3D::new(10.0, 10.0, 10.0);
-        let vec2 = super::Vec3D::new(-10.0, -10.0, -10.0);
+        let vec1 = Vec3D::new(10.0, 10.0, 10.0);
+        let vec2 = Vec3D::new(-10.0, -10.0, -10.0);
         assert_eq!(-vec1, vec2);
         assert_eq!(vec1, -vec2);
     }
 
     #[test]
     fn mul() {
-        let vec1 = super::Vec3D::new(10.0, 10.0, 10.0);
-        let vec2 = super::Vec3D::new(30.0, 30.0, 30.0);
+        let vec1 = Vec3D::new(10.0, 10.0, 10.0);
+        let vec2 = Vec3D::new(30.0, 30.0, 30.0);
         assert_eq!(vec1*3.0, vec2);
     }
 
     #[test]
     fn mul_assign() {
-        let mut vec1 = super::Vec3D::new(10.0, 10.0, 10.0);
-        let vec2 = super::Vec3D::new(30.0, 30.0, 30.0);
+        let mut vec1 = Vec3D::new(10.0, 10.0, 10.0);
+        let vec2 = Vec3D::new(30.0, 30.0, 30.0);
 
         vec1 *= 3.0;
         assert_eq!(vec1, vec2);
@@ -612,15 +611,15 @@ mod tests {
 
     #[test]
     fn div() {
-        let vec1 = super::Vec3D::new(30.0, 30.0, 30.0);
-        let vec2 = super::Vec3D::new(10.0, 10.0, 10.0);
+        let vec1 = Vec3D::new(30.0, 30.0, 30.0);
+        let vec2 = Vec3D::new(10.0, 10.0, 10.0);
         assert_eq!(vec1/3.0, vec2);
     }
 
     #[test]
     fn div_assign() {
-        let mut vec1 = super::Vec3D::new(30.0, 30.0, 30.0);
-        let vec2 = super::Vec3D::new(10.0, 10.0, 10.0);
+        let mut vec1 = Vec3D::new(30.0, 30.0, 30.0);
+        let vec2 = Vec3D::new(10.0, 10.0, 10.0);
 
         vec1 /= 3.0;
         assert_eq!(vec1, vec2);
