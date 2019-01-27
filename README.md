@@ -35,7 +35,7 @@ fn main() {
     let cross_product = vec5.cross(vec6);
     println!("{}", cross_product);      // Prints: "[0.0, 0.0, 1.0]"
 
-    // Plus initialisations from spherical/polar coordinates, rotations and more
+    // Plus initialisations from spherical/cylindrical coordinates, rotations and more
 }
 ```
 
