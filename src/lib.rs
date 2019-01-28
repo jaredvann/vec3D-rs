@@ -167,6 +167,18 @@ impl Vec3D {
         })
     }
 
+    /// Returns a new vector with a value of 0.0 in each axis
+    #[inline]
+    pub fn zeros() -> Self {
+        Self::new(0.0, 0.0, 0.0)
+    }
+
+    /// Returns a new vector with a value of 1.0 in each axis
+    #[inline]
+    pub fn ones() -> Self {
+        Self::new(1.0, 1.0, 1.0)
+    }
+
     /// Returns the projection of the vector in the x-axis
     #[inline]
     pub fn x_proj(&self) -> Self {
@@ -217,9 +229,9 @@ impl Vec3D {
         self.x * self.x + self.y * self.y + self.z * self.z
     }
 
-    /// Returns the vector's unit vector
+    /// Returns a new vector of the current vector normalised
     #[inline]
-    pub fn unit(&self) -> Self {
+    pub fn norm(&self) -> Self {
         let mag2 = self.mag2();
 
         if mag2 == 0.0 {
@@ -229,13 +241,19 @@ impl Vec3D {
         }
     }
 
+    /// Alias for `Vec3D::norm`
+    #[inline]
+    pub fn unit(&self) -> Self {
+        self.norm()
+    }
+
     /// Returns the inner product of this vector with another vector
     #[inline]
     pub fn inner_product(&self, other: Self) -> f64 {
         self.x * other.x + self.y * other.y + self.z * other.z
     }
 
-    /// Alias for Vec3D::inner_product
+    /// Alias for `Vec3D::inner_product`
     #[inline]
     pub fn dot(&self, other: Self) -> f64 {
         self.x * other.x + self.y * other.y + self.z * other.z
