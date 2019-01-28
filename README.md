@@ -1,6 +1,6 @@
 # vec3D
 
-[![Build Status](https://travis-ci.org/jaredvann/vec3D.svg?branch=master)](https://travis-ci.org/jaredvann/vec3D)
+[![Build Status](https://travis-ci.org/jaredvann/vec3D-rs.svg?branch=master)](https://travis-ci.org/jaredvann/vec3D-rs)
 [![Latest Version](https://img.shields.io/crates/v/vec3D.svg)](https://crates.io/crates/vec3D)
 [![Documentation](https://docs.rs/vec3D/badge.svg)](https://docs.rs/vec3D)
 
