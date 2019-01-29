@@ -107,8 +107,8 @@ pub struct Vec3D {
 }
 
 impl Vec3D {
-    pub fn new(x: f64, y: f64, z: f64) -> Self {
-        Self { x, y, z }
+    pub fn new(x: f64, y: f64, z: f64) -> Vec3D {
+        Vec3D { x, y, z }
     }
 
     /// Creates a new 3D vector from spherical coordinates
@@ -123,7 +123,7 @@ impl Vec3D {
     ///  - `r < 0`
     ///  - `theta < 0`
     ///  - `theta > PI`
-    pub fn new_from_spherical_coordinates(r: f64, theta: f64, phi: f64) -> Result<Self, Vec3DError> {
+    pub fn new_from_spherical_coordinates(r: f64, theta: f64, phi: f64) -> Result<Vec3D, Vec3DError> {
         if r < 0.0 {
             return Err(Vec3DError::RadiusLessThanZero);
         };
@@ -136,7 +136,7 @@ impl Vec3D {
         let (sin_phi, cos_phi) = phi.sin_cos();
         let rho = r * sin_theta;
 
-        Ok(Self {
+        Ok(Vec3D {
             x: rho * cos_phi,
             y: rho * sin_phi,
             z: r * cos_theta,
@@ -153,14 +153,14 @@ impl Vec3D {
     ///
     /// Will return a `Vec3DError` if:
     ///  - `r < 0`
-    pub fn new_from_cylindrical_coordinates(r: f64, phi: f64, z: f64) -> Result<Self, Vec3DError> {
+    pub fn new_from_cylindrical_coordinates(r: f64, phi: f64, z: f64) -> Result<Vec3D, Vec3DError> {
         if r < 0.0 {
             return Err(Vec3DError::RadiusLessThanZero);
         };
 
         let (sin_phi, cos_phi) = phi.sin_cos();
 
-        Ok(Self {
+        Ok(Vec3D {
             x: r * cos_phi,
             y: r * sin_phi,
             z,
@@ -169,32 +169,32 @@ impl Vec3D {
 
     /// Returns a new vector with a value of 0.0 in each axis
     #[inline]
-    pub fn zeros() -> Self {
-        Self::new(0.0, 0.0, 0.0)
+    pub fn zeros() -> Vec3D {
+        Vec3D::new(0.0, 0.0, 0.0)
     }
 
     /// Returns a new vector with a value of 1.0 in each axis
     #[inline]
-    pub fn ones() -> Self {
-        Self::new(1.0, 1.0, 1.0)
+    pub fn ones() -> Vec3D {
+        Vec3D::new(1.0, 1.0, 1.0)
     }
 
     /// Returns the projection of the vector in the x-axis
     #[inline]
-    pub fn x_proj(&self) -> Self {
-        Self::new(self.x, 0.0, 0.0)
+    pub fn x_proj(&self) -> Vec3D {
+        Vec3D::new(self.x, 0.0, 0.0)
     }
 
     /// Returns the projection of the vector in the y-axis
     #[inline]
-    pub fn y_proj(&self) -> Self {
-        Self::new(0.0, self.y, 0.0)
+    pub fn y_proj(&self) -> Vec3D {
+        Vec3D::new(0.0, self.y, 0.0)
     }
 
     /// Returns the projection of the vector in the z-axis
     #[inline]
-    pub fn z_proj(&self) -> Self {
-        Self::new(0.0, 0.0, self.z)
+    pub fn z_proj(&self) -> Vec3D {
+        Vec3D::new(0.0, 0.0, self.z)
     }
 
     /// Returns the vector's theta value in spherical coordinates
@@ -231,11 +231,11 @@ impl Vec3D {
 
     /// Returns a new vector of the current vector normalised
     #[inline]
-    pub fn norm(&self) -> Self {
+    pub fn norm(&self) -> Vec3D {
         let mag2 = self.mag2();
 
         if mag2 == 0.0 {
-            Self::new(0.0, 0.0, 0.0)
+            Vec3D::new(0.0, 0.0, 0.0)
         } else {
             *self * 1.0 / mag2.sqrt()
         }
@@ -243,25 +243,25 @@ impl Vec3D {
 
     /// Alias for `Vec3D::norm`
     #[inline]
-    pub fn unit(&self) -> Self {
+    pub fn unit(&self) -> Vec3D {
         self.norm()
     }
 
     /// Returns the inner product of this vector with another vector
     #[inline]
-    pub fn inner_product(&self, other: Self) -> f64 {
+    pub fn inner_product(&self, other: Vec3D) -> f64 {
         self.x * other.x + self.y * other.y + self.z * other.z
     }
 
     /// Alias for `Vec3D::inner_product`
     #[inline]
-    pub fn dot(&self, other: Self) -> f64 {
+    pub fn dot(&self, other: Vec3D) -> f64 {
         self.x * other.x + self.y * other.y + self.z * other.z
     }
 
     /// Returns the cross product of this vector with another vector
     #[inline]
-    pub fn cross(&self, other: Self) -> Self {
+    pub fn cross(&self, other: Vec3D) -> Vec3D {
         Vec3D::new(
             self.y * other.z - other.y * self.z,
             self.z * other.x - other.z * self.x,
@@ -314,7 +314,7 @@ impl Vec3D {
     }
 
     /// Returns true if points are approximately equal
-    pub fn approx_eq(self, other: Self) -> bool {
+    pub fn approx_eq(self, other: Vec3D) -> bool {
         self.x.approx_eq(&other.x, 2.0 * ::std::f64::EPSILON, 2)
             && self.y.approx_eq(&other.y, 2.0 * ::std::f64::EPSILON, 2)
             && self.z.approx_eq(&other.z, 2.0 * ::std::f64::EPSILON, 2)
@@ -329,42 +329,42 @@ impl fmt::Display for Vec3D {
 
 impl cmp::PartialEq for Vec3D {
     #[inline]
-    fn eq(&self, other: &Self) -> bool {
+    fn eq(&self, other: &Vec3D) -> bool {
         self.x == other.x && self.y == other.y && self.z == other.z
     }
 }
 impl Eq for Vec3D {}
 
-impl ops::Add<Self> for Vec3D {
-    type Output = Self;
+impl ops::Add<Vec3D> for Vec3D {
+    type Output = Vec3D;
 
     #[inline]
-    fn add(self, other: Self) -> Self {
-        Self::new(self.x + other.x, self.y + other.y, self.z + other.z)
+    fn add(self, other: Vec3D) -> Vec3D {
+        Vec3D::new(self.x + other.x, self.y + other.y, self.z + other.z)
     }
 }
 
-impl ops::AddAssign<Self> for Vec3D {
+impl ops::AddAssign<Vec3D> for Vec3D {
     #[inline]
-    fn add_assign(&mut self, other: Self) {
+    fn add_assign(&mut self, other: Vec3D) {
         self.x += other.x;
         self.y += other.y;
         self.z += other.z;
     }
 }
 
-impl ops::Sub<Self> for Vec3D {
-    type Output = Self;
+impl ops::Sub<Vec3D> for Vec3D {
+    type Output = Vec3D;
 
     #[inline]
-    fn sub(self, other: Self) -> Self {
-        Self::new(self.x - other.x, self.y - other.y, self.z - other.z)
+    fn sub(self, other: Vec3D) -> Vec3D {
+        Vec3D::new(self.x - other.x, self.y - other.y, self.z - other.z)
     }
 }
 
-impl ops::SubAssign<Self> for Vec3D {
+impl ops::SubAssign<Vec3D> for Vec3D {
     #[inline]
-    fn sub_assign(&mut self, other: Self) {
+    fn sub_assign(&mut self, other: Vec3D) {
         self.x -= other.x;
         self.y -= other.y;
         self.z -= other.z;
@@ -372,20 +372,20 @@ impl ops::SubAssign<Self> for Vec3D {
 }
 
 impl ops::Neg for Vec3D {
-    type Output = Self;
+    type Output = Vec3D;
 
     #[inline]
-    fn neg(self) -> Self {
-        Self::new(-self.x, -self.y, -self.z)
+    fn neg(self) -> Vec3D {
+        Vec3D::new(-self.x, -self.y, -self.z)
     }
 }
 
 impl ops::Mul<f64> for Vec3D {
-    type Output = Self;
+    type Output = Vec3D;
 
     #[inline]
-    fn mul(self, other: f64) -> Self {
-        Self::new(self.x * other, self.y * other, self.z * other)
+    fn mul(self, other: f64) -> Vec3D {
+        Vec3D::new(self.x * other, self.y * other, self.z * other)
     }
 }
 
@@ -399,11 +399,11 @@ impl ops::MulAssign<f64> for Vec3D {
 }
 
 impl ops::Div<f64> for Vec3D {
-    type Output = Self;
+    type Output = Vec3D;
 
     #[inline]
-    fn div(self, other: f64) -> Self {
-        Self::new(self.x / other, self.y / other, self.z / other)
+    fn div(self, other: f64) -> Vec3D {
+        Vec3D::new(self.x / other, self.y / other, self.z / other)
     }
 }
 
