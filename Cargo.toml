@@ -5,6 +5,7 @@ authors = ["Jared Vann <jared@vann.me>"]
 edition = "2018"
 description = "A minimal 3D Vector library in Rust."
 repository = "https://github.com/jaredvann/vec3D-rs"
+license = "MIT"
 license-file = "LICENSE"
 readme = "README.md"
 keywords = ["geometry", "vector", "physics"]

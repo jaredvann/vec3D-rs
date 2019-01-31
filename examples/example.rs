@@ -1,7 +1,7 @@
 use vec3D::Vec3D;
 
 fn main() {
-    // Simple Initialisation
+    // Simple initialisation
     let vec1 = Vec3D::new(1.0, 2.0, 3.0);
     println!("{}", vec1);               // Prints: "[1.0, 2.0, 3.0]"
 
