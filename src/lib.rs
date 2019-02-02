@@ -307,6 +307,13 @@ impl Vec3D {
         self.y = ty;
     }
 
+    /// Returns a new vector of the current vector rotated around the x-axis
+    pub fn rotated_x(&self, angle: f64) -> Vec3D {
+        let (sinphi, cosphi) = angle.sin_cos();
+
+        Vec3D::new(self.x, self.y * cosphi - self.z * sinphi, self.z * cosphi + self.y * sinphi)
+    }
+
     /// Rotates the vector around the y-axis
     pub fn rotate_y(&mut self, angle: f64) {
         let (sinphi, cosphi) = angle.sin_cos();
@@ -316,6 +323,13 @@ impl Vec3D {
         self.z = tz;
     }
 
+    /// Returns a new vector of the current vector rotated around the y-axis
+    pub fn rotated_y(&self, angle: f64) -> Vec3D {
+        let (sinphi, cosphi) = angle.sin_cos();
+
+        Vec3D::new(self.x * cosphi + self.z * sinphi, self.y, self.z * cosphi - self.x * sinphi)
+    }
+
     /// Rotates the vector around the z-axis
     pub fn rotate_z(&mut self, angle: f64) {
         let (sinphi, cosphi) = angle.sin_cos();
@@ -323,6 +337,13 @@ impl Vec3D {
         let tx = self.x * cosphi - self.y * sinphi;
         self.y = self.y * cosphi + self.x * sinphi;
         self.x = tx;
+    }
+
+    /// Returns a new vector of the current vector rotated around the z-axis
+    pub fn rotated_z(&self, angle: f64) -> Vec3D {
+        let (sinphi, cosphi) = angle.sin_cos();
+
+        Vec3D::new(self.x * cosphi - self.y * sinphi, self.y * cosphi + self.x * sinphi, self.z)
     }
 
     /// Returns true if points are approximately equal
@@ -665,6 +686,47 @@ mod tests {
     }
 
     #[test]
+    fn rotated_x() {
+        // Test on null vector, rotate 0
+        let vec1 = Vec3D::new(0.0, 0.0, 0.0);
+        let vec2 = vec1.rotated_x(0.0);
+        assert_eq!(vec1, vec2);
+
+        // Test on null vector, rotate 180
+        let vec1 = Vec3D::new(0.0, 0.0, 0.0);
+        let vec2 = vec1.rotated_x(PI);
+        assert_eq!(vec1, vec2);
+
+        // Test on y-dir unit vector, rotate PI
+        let vec1 = Vec3D::new(0.0, 1.0, 0.0);
+        let vec2 = vec1.rotated_x(PI);
+        assert_nearly_eq!(vec2.x, 0.0);
+        assert_nearly_eq!(vec2.y, -1.0);
+        assert_nearly_eq!(vec2.z, 0.0);
+
+        // Test on y-dir unit vector, rotate PI/2
+        let vec1 = Vec3D::new(0.0, 1.0, 0.0);
+        let vec2 = vec1.rotated_x(PI / 2.0);
+        assert_nearly_eq!(vec2.x, 0.0);
+        assert_nearly_eq!(vec2.y, 0.0);
+        assert_nearly_eq!(vec2.z, 1.0);
+
+        // Test on z-dir unit vector, rotate PI
+        let vec1 = Vec3D::new(0.0, 0.0, 1.0);
+        let vec2 = vec1.rotated_x(PI);
+        assert_nearly_eq!(vec2.x, 0.0);
+        assert_nearly_eq!(vec2.y, 0.0);
+        assert_nearly_eq!(vec2.z, -1.0);
+
+        // Test on z-dir unit vector, rotate PI/2
+        let vec1 = Vec3D::new(0.0, 0.0, 1.0);
+        let vec2 = vec1.rotated_x(PI / 2.0);
+        assert_nearly_eq!(vec2.x, 0.0);
+        assert_nearly_eq!(vec2.y, -1.0);
+        assert_nearly_eq!(vec2.z, 0.0);
+    }
+
+    #[test]
     fn rotate_y() {
         // Test on null vector, rotate 0
         let vec = Vec3D::new(0.0, 0.0, 0.0);
@@ -708,6 +770,47 @@ mod tests {
     }
 
     #[test]
+    fn rotated_y() {
+        // Test on null vector, rotate 0
+        let vec1 = Vec3D::new(0.0, 0.0, 0.0);
+        let vec2 = vec1.rotated_y(0.0);
+        assert_eq!(vec1, vec2);
+
+        // Test on null vector, rotate 180
+        let vec1 = Vec3D::new(0.0, 0.0, 0.0);
+        let vec2 = vec1.rotated_y(PI);
+        assert_eq!(vec1, vec2);
+
+        // Test on x-dir unit vector, rotate PI
+        let vec1 = Vec3D::new(1.0, 0.0, 0.0);
+        let vec2 = vec1.rotated_y(PI);
+        assert_nearly_eq!(vec2.x, -1.0);
+        assert_nearly_eq!(vec2.y, 0.0);
+        assert_nearly_eq!(vec2.z, 0.0);
+
+        // Test on x-dir unit vector, rotate PI/2
+        let vec1 = Vec3D::new(1.0, 0.0, 0.0);
+        let vec2 = vec1.rotated_y(PI / 2.0);
+        assert_nearly_eq!(vec2.x, 0.0);
+        assert_nearly_eq!(vec2.y, 0.0);
+        assert_nearly_eq!(vec2.z, -1.0);
+
+        // Test on z-dir unit vector, rotate PI
+        let vec1 = Vec3D::new(0.0, 0.0, 1.0);
+        let vec2 = vec1.rotated_y(PI);
+        assert_nearly_eq!(vec2.x, 0.0);
+        assert_nearly_eq!(vec2.y, 0.0);
+        assert_nearly_eq!(vec2.z, -1.0);
+
+        // Test on z-dir unit vector, rotate PI/2
+        let vec1 = Vec3D::new(0.0, 0.0, 1.0);
+        let vec2 = vec1.rotated_y(PI / 2.0);
+        assert_nearly_eq!(vec2.x, 1.0);
+        assert_nearly_eq!(vec2.y, 0.0);
+        assert_nearly_eq!(vec2.z, 0.0);
+    }
+
+    #[test]
     fn rotate_z() {
         // Test on null vector, rotate 0
         let vec = Vec3D::new(0.0, 0.0, 0.0);
@@ -748,6 +851,47 @@ mod tests {
         assert_nearly_eq!(vec.x, -1.0);
         assert_nearly_eq!(vec.y, 0.0);
         assert_nearly_eq!(vec.z, 0.0);
+    }
+
+    #[test]
+    fn rotated_z() {
+        // Test on null vector, rotate 0
+        let vec1 = Vec3D::new(0.0, 0.0, 0.0);
+        let vec2 = vec1.rotated_z(0.0);
+        assert_eq!(vec1, vec2);
+
+        // Test on null vector, rotate 180
+        let vec1 = Vec3D::new(0.0, 0.0, 0.0);
+        let vec2 = vec1.rotated_z(PI);
+        assert_eq!(vec1, vec2);
+
+        // Test on x-dir unit vector, rotate PI
+        let vec1 = Vec3D::new(1.0, 0.0, 0.0);
+        let vec2 = vec1.rotated_z(PI);
+        assert_nearly_eq!(vec2.x, -1.0);
+        assert_nearly_eq!(vec2.y, 0.0);
+        assert_nearly_eq!(vec2.z, 0.0);
+
+        // Test on x-dir unit vector, rotate PI/2
+        let vec1 = Vec3D::new(1.0, 0.0, 0.0);
+        let vec2 = vec1.rotated_z(PI / 2.0);
+        assert_nearly_eq!(vec2.x, 0.0);
+        assert_nearly_eq!(vec2.y, 1.0);
+        assert_nearly_eq!(vec2.z, 0.0);
+
+        // Test on y-dir unit vector, rotate PI
+        let vec1 = Vec3D::new(0.0, 1.0, 0.0);
+        let vec2 = vec1.rotated_z(PI);
+        assert_nearly_eq!(vec2.x, 0.0);
+        assert_nearly_eq!(vec2.y, -1.0);
+        assert_nearly_eq!(vec2.z, 0.0);
+
+        // Test on y-dir unit vector, rotate PI/2
+        let vec1 = Vec3D::new(0.0, 1.0, 0.0);
+        let vec2 = vec1.rotated_z(PI / 2.0);
+        assert_nearly_eq!(vec2.x, -1.0);
+        assert_nearly_eq!(vec2.y, 0.0);
+        assert_nearly_eq!(vec2.z, 0.0);
     }
 
     #[test]
