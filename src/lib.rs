@@ -259,6 +259,18 @@ impl Vec3D {
         self.x * other.x + self.y * other.y + self.z * other.z
     }
 
+    /// Returns the distance between this vector and another vector
+    #[inline]
+    pub fn distance_to(&self, other: Vec3D) -> f64 {
+        (*self - other).mag()
+    }
+
+    /// Returns the distance^2 between this vector and another vector
+    #[inline]
+    pub fn distance_to2(&self, other: Vec3D) -> f64 {
+        (*self - other).mag2()
+    }
+
     /// Returns the cross product of this vector with another vector
     #[inline]
     pub fn cross(&self, other: Vec3D) -> Vec3D {
@@ -563,6 +575,26 @@ mod tests {
         let vec2 = Vec3D::new(40.0, 50.0, 60.0);
         assert_eq!(vec1.dot(vec2), 3200.0);
         assert_eq!(vec2.dot(vec1), 3200.0);
+    }
+
+    #[test]
+    fn distance_to() {
+        // Test calculation of distance between two vectors
+        let vec1 = Vec3D::new(10.0, 20.0, 30.0);
+        let vec2 = Vec3D::new(40.0, 50.0, 60.0);
+        
+        assert_nearly_eq!(vec1.distance_to(vec1), 0.0);
+        assert_nearly_eq!(vec1.distance_to(vec2), 51.96152422706632);
+    }
+
+    #[test]
+    fn distance_to2() {
+        // Test calculation of distance^2 between two vectors
+        let vec1 = Vec3D::new(10.0, 20.0, 30.0);
+        let vec2 = Vec3D::new(40.0, 50.0, 60.0);
+        
+        assert_nearly_eq!(vec1.distance_to2(vec1), 0.0);
+        assert_nearly_eq!(vec1.distance_to2(vec2), 2700.0);
     }
 
     #[test]
